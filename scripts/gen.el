@@ -1,4 +1,5 @@
-#!/usr/bin/env emacs --quick --script
+#!/bin/sh
+":"; exec emacs --quick --script "$0" "$@"
 ;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 (setq debug-on-error t
