@@ -1,6 +1,5 @@
 #!/bin/sh
-":"; exec emacs --quick --script "$0" "$@"
-;; -*- mode: emacs-lisp; lexical-binding: t; -*-
+":"; exec emacs --quick --script "$0" "$@" # -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 (setq debug-on-error t
       dired-use-ls-dired nil)
@@ -16,7 +15,7 @@
 
 (cl-defun reading-time (file &optional (wpm 275.0))
   (with-temp-buffer
-    (insert (sh "pandoc -f markdown -t plain" file))
+    (insert-file-contents file)
     (let* ((minutes (/ (count-words-region (point-min) (point-max)) wpm)))
       (format "%s minute read" (ceiling minutes)))))
 
@@ -74,6 +73,8 @@
                               `((path . ,(replace-extension md-path "html"))
                                 (title . ,(alist-get 'title meta))
                                 (iso-date . ,(format-time-string "%FT%TZ" time))
+                                (id . ,(alist-get 'id meta))
+                                (abstract . ,(alist-get 'abstract meta))
                                 (short-iso-date . ,(format-time-string "%F" time))
                                 (time . ,time)))))
 
@@ -88,9 +89,9 @@
       dom
     (cl-destructuring-bind (tag attrs &rest kids) dom
       (let* ((rendered-attrs (render-attrs attrs)))
-        (format "<%s%s%s>\n%s\n</%s>\n"
+        (format "<%s%s%s>%s</%s>\n"
                 tag
-                (if rendered-attrs " " "")
+                (if (zerop (length rendered-attrs)) "" " ")
                 rendered-attrs
                 (mapconcat #'render-html kids "")
                 tag)))))
@@ -119,6 +120,38 @@
         (error "Couldn't find $posts$ variable in index template."))
       (replace-match (mapconcat #'render-html posts ""))
       (buffer-string))))
+
+(cl-defun script-command-atom
+    (posts-dir
+     feed-title
+     feed-author
+     feed-baseurl
+     feed-id
+     entry-baseurl)
+  "Generates the Atom feed."
+  (let* ((feed-updated (format-time-string "%FT%TZ" nil t))
+         (entries (avl-tree-mapcar
+                   (lambda (entry)
+                     `(entry ()
+                       (title () ,(alist-get 'title entry))
+                       (link ((href . ,(concat entry-baseurl "/" (alist-get 'path entry)))))
+                       (id () ,(alist-get 'id entry))
+                       (updated () ,feed-updated)
+                       (summary () ,(alist-get 'abstract entry))))
+                   (sorted-posts posts-dir #'post-before?))))
+    (concat "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+            (render-html
+             `(feed ((xmlns . "http://www.w3.org/2005/Atom"))
+                    (title () ,feed-title)
+                    (link ((href . ,feed-baseurl)))
+                    (link ((rel . "self")
+                           (href . ,(concat feed-baseurl "/atom.xml"))))
+                    (updated () ,feed-updated)
+                    (author () (name () ,feed-author))
+                    (id () ,feed-id)
+                    ,@entries)))))
+
+
 
 (cl-defun print-usage ()
   (princ "Available commands:\n")
