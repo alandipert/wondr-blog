@@ -136,7 +136,7 @@
                        (title () ,(alist-get 'title entry))
                        (link ((href . ,(concat entry-baseurl "/" (alist-get 'path entry)))))
                        (id () ,(alist-get 'id entry))
-                       (updated () ,feed-updated)
+                       (updated () ,(alist-get 'iso-date entry))
                        (summary () ,(alist-get 'abstract entry))))
                    (sorted-posts posts-dir #'post-before?))))
     (concat "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
