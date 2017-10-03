@@ -1,5 +1,4 @@
-#!/bin/sh
-":"; exec emacs --quick --script "$0" "$@" # -*- mode: emacs-lisp; lexical-binding: t; -*-
+;; -*- mode: emacs-lisp; lexical-binding: t; -*-
 
 (setq debug-on-error t
       dired-use-ls-dired nil)

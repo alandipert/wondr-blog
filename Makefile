@@ -7,6 +7,7 @@ TITLE := "Wondr Blog"
 AUTHOR := "Alan Dipert"
 BLOG_URL := http://example.com
 POST_BASE_URL := $(BLOG_URL)/posts
+GEN := emacs --quick --script scripts/gen.el
 
 all: atom.xml index.html style.css $(POSTS_HTML)
 
@@ -14,13 +15,13 @@ style.css: $(SCSS)
 	sass stylesheets/style.scss > style.css
 
 atom.xml: $(POSTS_MD) scripts/gen.el
-	./scripts/gen.el atom "posts" $(TITLE) $(AUTHOR) $(BLOG_URL) $(FEED_ID) $(POST_BASE_URL) > $@
+	$(GEN) atom "posts" $(TITLE) $(AUTHOR) $(BLOG_URL) $(FEED_ID) $(POST_BASE_URL) > $@
 
 index.html: templates/index.html $(POSTS_HTML) scripts/gen.el
-	./scripts/gen.el index "posts" $< > $@
+	$(GEN) index "posts" $< > $@
 
 %.html: %.md templates/article.html scripts/gen.el
-	./scripts/gen.el post $< > $@
+	$(GEN) post $< > $@
 
 clean:
 	rm -f atom.xml index.html style.css $(POSTS_HTML)
