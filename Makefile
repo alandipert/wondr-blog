@@ -2,11 +2,13 @@
 POSTS_MD := $(wildcard posts/*.md)
 POSTS_HTML := $(POSTS_MD:%.md=%.html)
 SCSS := $(shell find stylesheets -type f -name '*.scss')
-FEED_ID := urn:uuid:3e5be466-173c-4159-996f-17326c665756
-TITLE := "Wondr Blog"
+
 AUTHOR := "Alan Dipert"
 BLOG_URL := http://example.com
+FEED_ID := urn:uuid:3e5be466-173c-4159-996f-17326c665756
 POST_BASE_URL := $(BLOG_URL)/posts
+TITLE := "Wondr Blog"
+
 GEN := emacs --quick --script scripts/gen.el
 
 all: atom.xml index.html style.css $(POSTS_HTML)
