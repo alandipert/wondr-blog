@@ -46,8 +46,13 @@ img {
   height: auto;
 }
 
-figure {
+.figure {
+  border: 1px solid #ccc;
   margin: 1em 0;
+  text-align: center;
+  .caption {
+    font-style: italic;
+  }
 }
 
 /* Lists */

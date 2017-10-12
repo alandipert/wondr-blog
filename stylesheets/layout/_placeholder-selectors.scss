@@ -1,8 +1,8 @@
 %pseudoSeperator {
   content: '';
   display: block;
-  border-bottom: .1111111111111111em solid $color--accent;
-  width: 4em;
+  border-bottom: 1px solid $color--accent;
+  width: 100%;
 }
 
 %seperatorAfter {
