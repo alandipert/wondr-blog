@@ -11,9 +11,9 @@ I recently enjoyed participating in a [discussion about recursion in R][1] on th
 new [RStudio Community][2] site, and I thought to inaugurate my blog with a post
 inspired by the discussion.
 
-R supports recursive functions, but does not optimize _tail recursive_ functions
+R supports recursive functions, but does not optimize [_tail recursive_][tail-recursive] functions
 the way some other languages do. Fortunately, with a mechanism known as a
-_trampoline_, the R programmer can implement something like the optimization
+[_trampoline_][trampoline], the R programmer can implement something like the optimization
 manually and with very little code.
 
 To understand trampolines, one must first understand the mechanics of function
@@ -230,4 +230,6 @@ Thanks for reading, I hope you enjoyed! In summary:
 [3]: http://www.jimhester.com/
 [sicp]: https://mitpress.mit.edu/sicp/full-text/sicp/book/node82.html
 [recursion-types]: https://en.wikipedia.org/wiki/Recursion_(computer_science)#single_recursion
+[tail-recursive]: https://en.wikipedia.org/wiki/Tail_call
+[trampoline]: https://en.wikipedia.org/wiki/Trampoline_(computing)#High-level_programming
 
