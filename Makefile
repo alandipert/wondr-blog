@@ -25,9 +25,6 @@ index.html: templates/index.html $(POSTS_HTML) scripts/gen.el
 %.html: %.md templates/article.html scripts/gen.el
 	$(GEN) post $< > $@
 
-%.png: %.txt
-	ditaa -T $< $@
-
 clean:
 	rm -f atom.xml index.html style.css $(POSTS_HTML)
 

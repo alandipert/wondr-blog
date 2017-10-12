@@ -8,25 +8,41 @@
 (require 'json)
 (require 'parse-time)
 
-(cl-defun sh (&rest args)
+(cl-defun sh (command &rest args)
+  "Runs the shell command with args and returns its standard output as a string."
   (shell-command-to-string
-   (mapconcat #'identity args " ")))
+   (mapconcat #'identity (cons command args) " ")))
 
 (cl-defun reading-time (file &optional (wpm 275.0))
+  "Estimates the reading time of the text file. Defaults to a wpm
+of 275, same as Medium."
   (with-temp-buffer
     (insert-file-contents file)
     (let* ((minutes (/ (count-words-region (point-min) (point-max)) wpm)))
       (format "%s minute read" (ceiling minutes)))))
 
 (cl-defun parse-iso-date (date-string)
+  "Parses an ISO date string of the form YYYY-MM-DD and converts
+it to an Emacs 'internal time'."
   (let* ((day-month-year (cl-subseq (parse-time-string date-string) 3 6)))
     (apply #'encode-time `(0 0 0 ,@day-month-year))))
 
 (defmacro with-tmp (file-name-var suffix &rest body)
+  "Evaluates body in a context with file-name-var bound to the
+name of a temporary file. Deletes the temporary file and then
+returns the result of body."
   (declare (indent defun))
   `(let* ((,file-name-var (make-temp-file "with-tmp" nil ,suffix)))
      (unwind-protect (progn ,@body)
        (delete-file ,file-name-var))))
+
+(defmacro defcommand (name &rest defun-spec)
+  "Defines a 'command', which is a function accessible as a
+command argument to this script. A command is any function with
+the prefix script-command-, this is just a convenience macro for
+creating one."
+  `(cl-defun ,(intern (concat "script-command-" (symbol-name name)))
+       ,@defun-spec))
 
 (cl-defun script-command-meta-json (file)
   "The metadata of a Pandoc markdown file formatted as JSON."
@@ -34,7 +50,7 @@
     (with-temp-file tmp (insert "$meta-json$"))
     (sh "pandoc -t plain --template" (file-name-sans-extension tmp) file)))
 
-(cl-defun script-command-post (file)
+(defcommand post (file)
   "Generates the HTML for a single blog entry."
   (let* ((meta (json-read-from-string (script-command-meta-json file)))
          (time (parse-iso-date (alist-get 'date meta))))
@@ -48,20 +64,30 @@
         file)))
 
 (defmacro with-let (binding &rest body)
+  "Evaluates body with binding, and returns the value of the
+binding variable. Equivalent to (let* ((x ...)) ... x)"
   (declare (indent defun))
   `(let* (,binding) ,@body ,(car binding)))
 
 (cl-defun post-before? (x y)
+  "True when post x has an 'internal time' time property that
+precedes that of post y."
   (apply #'time-less-p (mapcar (apply-partially #'alist-get 'time) (list x y))))
 
 (cl-defun replace-extension (filename new-ext)
+  "Replaces the extension of filename with new-ext."
   (concat (file-name-sans-extension filename) "." new-ext))
 
 (cl-defun complement (func)
+  "Returns the complement of predicate func."
   (lambda (&rest args)
     (not (apply func args))))
 
 (cl-defun sorted-posts (posts-dir compare-func)
+  "Provided a directory of posts and a function to compare them
+by, returns an avl tree of the posts sorted by compare-func.
+Posts are alists various properties given by the path to
+posts-dir and the metadata in the posts."
   (cl-loop with avl-tree = (avl-tree-create compare-func)
            finally return avl-tree
            for post in (directory-files posts-dir nil "\\.md$" t)
