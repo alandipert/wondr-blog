@@ -216,6 +216,15 @@ odd <- trampoline(function(n) {
 })
 ~~~
 
+### Conclusion
+
+Thanks for reading, I hope you enjoyed! In summary:
+
+* A certain kind of recursive function, tail recursive, can be mechanically transformed into a loop.
+* In languages that don't perform the transformation automatically, it can be applied manually by the programmer using a _trampoline_.
+* Some recursive functions can be transformed to tail recursive functions with the introduction of _accumulator_ variables, which are facilitated by R's support for named arguments.
+* Mutually-recursive functions can also be trampolined.
+
 [1]: https://community.rstudio.com/t/tidiest-way-to-do-recursion-safely-in-r/1408
 [2]: https://community.rstudio.com/
 [3]: http://www.jimhester.com/
