@@ -169,7 +169,7 @@ R's named and default argument support, can be done in a decidedly un-loopy way:
 
 ~~~{.r}
 factorial <- function(n, prod = 1) {
-  if (n == 0) 1 else factorial(n-1, n*prod)
+  if (n == 0) prod else factorial(n-1, n*prod)
 }
 ~~~
 
