@@ -133,8 +133,7 @@ posts-dir and the metadata in the posts."
                         (a ((href . ,(alist-get 'path post)))
                            ,(alist-get 'title post))))))
 
-(cl-defun script-command-index
-    (posts-dir template-file)
+(defcommand index (posts-dir template-file)
   "Generates the blog index page."
   (let* ((posts (avl-tree-mapcar
                  #'index-post-entry
@@ -146,7 +145,7 @@ posts-dir and the metadata in the posts."
       (replace-match (mapconcat #'render-html posts ""))
       (buffer-string))))
 
-(cl-defun script-command-atom
+(defcommand atom
     (posts-dir
      feed-title
      feed-author
@@ -175,8 +174,6 @@ posts-dir and the metadata in the posts."
                     (author () (name () ,feed-author))
                     (id () ,feed-id)
                     ,@entries)))))
-
-
 
 (cl-defun print-usage ()
   (princ "Available commands:\n")

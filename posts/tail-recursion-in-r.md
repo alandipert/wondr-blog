@@ -1,10 +1,13 @@
 ---
-date: "2017-10-15"
+date: "2017-10-13"
 keywords: ["fp", "recursion"]
 title: "Tail Recursion in R with Trampolines"
 id: "urn:uuid:d3d294fc-7822-44b3-b2c9-77f1ed34bcbc"
 abstract: |
-  TODO
+  R supports recursive functions, but does not optimize tail-recursive
+  functions. Fortunately, with a mechanism known as a trampoline, the R
+  programmer can implement something like the optimization manually and with
+  very little code.
 ---
 
 I recently enjoyed participating in a [discussion about recursion in R][1] on the
@@ -71,7 +74,7 @@ countdown <- function(n) {
 }
 ~~~
 
-It doesn't "overflow" the stack:
+It doesn't _overflow_ the stack:
 
 ~~~
 > countdown(10000)
@@ -87,11 +90,11 @@ If it does what we want, and looks only slightly different than the recursive
 version... why did we care about recursion again?
 
 Well, maybe we don't. The choice to use recursion is a stylistic one with
- arguable benefits.
+arguable benefits. People with a mathematical bent seem to enjoy it. So do I,
+usually.
 
 Forgoing a debate of the merits of recursive style, let's assume we want it, and
-that we need a technique that somehow lets us write recursive functions without
-needing to worry about the stack limit.
+continue on to trampolines: a means to stack-friendly recursive functions.
 
 ### Trampoline
 
@@ -138,9 +141,9 @@ The only new requirement of this re-arrangement is that the _body_, or the `f`
 function, return `recur` instead of calling itself if it wants to keep going.
 
 In languages that perform this optimization automatically, applicable cases are
-recognized automatically by the compiler and the recursive code is rewritten as
-a loop. Compilers that do this are said to "support TCO" where TCO stands for
-tail-call optimization.
+recognized by the compiler and the recursive code is rewritten as a loop.
+Compilers that do this are said to perform _TCO_, where TCO stands for tail-call
+optimization.
 
 ### Tail call conversion
 
@@ -155,9 +158,11 @@ factorial <- function(n) if (n == 0) 1 else n*factorial(n-1)
 
 > Note: It probably wouldn't make sense to trampoline this function without
 > other modifications first, because `n` is coerced to the `numeric` class if it
-> wasn't already. For medium-sized `n`, `n` overflows to `Inf` before the stack
-> overflows. I'll use `factorial` anyway because it's compact and the
-> transformation is clear.
+> wasn't already. For medium-sized `n`, the numeric (double precision) `n`
+> overflows to `Inf` before the stack overflows.
+> The [gmp](https://cran.r-project.org/web/packages/gmp/index.html) library
+> might be a way to produce the necessary large integers. I'll use `factorial`
+> anyway because it's a compact function and the transformation is clear.
 
 The "tail" of `factorial` is the expression `n*factorial(n-1)`, which places a
 call to `factorial` on the stack before returning. This is exactly the operation
@@ -220,9 +225,13 @@ odd <- trampoline(function(n) {
 
 Thanks for reading, I hope you enjoyed! In summary:
 
-* A certain kind of recursive function, tail recursive, can be mechanically transformed into a loop.
-* In languages that don't perform the transformation automatically, it can be applied manually by the programmer using a _trampoline_.
-* Some recursive functions can be transformed to tail recursive functions with the introduction of _accumulator_ variables, which are facilitated by R's support for named arguments.
+* A certain kind of recursive function, tail recursive, can be mechanically
+  transformed into a loop and so not consume stack space.
+* In languages that don't perform the transformation automatically, it can be
+  applied manually by the programmer using a _trampoline_.
+* Some recursive functions can be transformed to tail recursive functions with
+  the introduction of _accumulator_ variables, which are facilitated by R's
+  support for named arguments.
 * Mutually-recursive functions can also be trampolined.
 
 [1]: https://community.rstudio.com/t/tidiest-way-to-do-recursion-safely-in-r/1408

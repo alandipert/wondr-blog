@@ -3,3 +3,4 @@ style.css
 index.html
 posts/*.html
 .sass-cache
+public/

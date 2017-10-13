@@ -4,14 +4,14 @@ POSTS_HTML := $(POSTS_MD:%.md=%.html)
 SCSS := $(shell find stylesheets -type f -name '*.scss')
 
 AUTHOR := "Alan Dipert"
-BLOG_URL := http://example.com
+BLOG_URL := https://tailrecursion.com/wondr
 FEED_ID := urn:uuid:3e5be466-173c-4159-996f-17326c665756
 POST_BASE_URL := $(BLOG_URL)/posts
 TITLE := "Wondr Blog"
 
 GEN := emacs --quick --script scripts/gen.el
 
-all: atom.xml index.html style.css $(POSTS_HTML)
+all: public
 
 style.css: $(SCSS)
 	sass stylesheets/style.scss > style.css
@@ -25,10 +25,22 @@ index.html: templates/index.html $(POSTS_HTML) scripts/gen.el
 %.html: %.md templates/article.html scripts/gen.el
 	$(GEN) post $< > $@
 
+public: atom.xml index.html code_highlight.css style.css $(POSTS_HTML)
+	$(shell mkdir -p public/posts)
+	cp atom.xml public
+	cp index.html public
+	cp style.css public
+	cp code_highlight.css public
+	$(foreach html,$(POSTS_HTML),$(shell cp $(html) public/$(html)))
+
+deploy: public
+	s3_website push
+
 clean:
 	rm -f atom.xml index.html style.css $(POSTS_HTML)
+	rm -rf public
 
 print-%:
 	@echo '$*=$($*)'
 
-.PHONY: clean print-%
+.PHONY: clean print-% deploy
