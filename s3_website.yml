@@ -4,3 +4,9 @@ s3_bucket: tailrecursion.com
 s3_key_prefix: wondr
 cloudfront_distribution_id: E6GOTXLS9MCZF
 site: public
+gzip: true
+gzip:
+  - .html
+  - .css
+  - .js
+  - .xml
