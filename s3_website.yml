@@ -11,8 +11,5 @@ gzip:
   - .js
   - .xml
 cache_control:
-  "code_highlight.css": public, max-age=604800
-  "style.css": public, max-age=604800
-  "posts/*": public, max-age=3600
-  "index.html": public, max-age=3600
-  "atom.xml": public, max-age=3600
+  "wondr/code_highlight.css": public, max-age=604800
+  "wondr/style.css": public, max-age=604800
