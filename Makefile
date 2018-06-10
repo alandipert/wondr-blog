@@ -10,6 +10,8 @@ POST_BASE_URL := $(BLOG_URL)/posts
 TITLE := "Wondr Blog"
 
 CF_DIST := E6GOTXLS9MCZF
+S3_PATH := s3://tailrecursion.com/wondr
+CACHE_CONTROL := max-age=604800
 
 GEN := emacs --quick --script scripts/gen.el
 
@@ -36,7 +38,7 @@ public: atom.xml index.html code_highlight.css style.css $(POSTS_HTML)
 	$(foreach html,$(POSTS_HTML),$(shell cp $(html) public/$(html)))
 
 deploy: public
-	aws s3 sync public s3://tailrecursion.com/wondr --cache-control 'max-age=604800'
+	aws s3 sync public $(S3_PATH) --cache-control $(CACHE_CONTROL)
 	aws cloudfront create-invalidation --distribution-id $(CF_DIST) --paths '/*'
 
 clean:
