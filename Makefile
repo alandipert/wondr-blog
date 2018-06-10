@@ -9,12 +9,14 @@ FEED_ID := urn:uuid:3e5be466-173c-4159-996f-17326c665756
 POST_BASE_URL := $(BLOG_URL)/posts
 TITLE := "Wondr Blog"
 
+CF_DIST := E6GOTXLS9MCZF
+
 GEN := emacs --quick --script scripts/gen.el
 
 all: public
 
 style.css: $(SCSS)
-	sass stylesheets/style.scss > style.css
+	sassc stylesheets/style.scss > style.css
 
 atom.xml: $(POSTS_MD) scripts/gen.el
 	$(GEN) atom "posts" $(TITLE) $(AUTHOR) $(BLOG_URL) $(FEED_ID) $(POST_BASE_URL) > $@
@@ -34,7 +36,8 @@ public: atom.xml index.html code_highlight.css style.css $(POSTS_HTML)
 	$(foreach html,$(POSTS_HTML),$(shell cp $(html) public/$(html)))
 
 deploy: public
-	s3_website push
+	aws s3 sync public s3://tailrecursion.com/wondr --cache-control 'max-age=604800'
+	aws cloudfront create-invalidation --distribution-id $(CF_DIST) --paths '/*'
 
 clean:
 	rm -f atom.xml index.html style.css $(POSTS_HTML)
