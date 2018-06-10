@@ -33,7 +33,7 @@ Needs:
 
 * The `s3_website` Ruby gem
 
-    make deploy
+`make deploy`
     
 This part will only work if you're me, but hopefully it's clear enough what to
 edit to make this your own. The `Makefile` and `s3_website.yml` files contain
