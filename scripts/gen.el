@@ -83,25 +83,23 @@ precedes that of post y."
   (lambda (&rest args)
     (not (apply func args))))
 
-(cl-defun sorted-posts (posts-dir compare-func)
+(cl-defun sorted-posts (posts-dir compare-func &aux (avl-tree (avl-tree-create compare-func)))
   "Provided a directory of posts and a function to compare them
 by, returns an avl tree of the posts sorted by compare-func.
 Posts are alists various properties given by the path to
 posts-dir and the metadata in the posts."
-  (cl-loop with avl-tree = (avl-tree-create compare-func)
-           finally return avl-tree
-           for post in (directory-files posts-dir nil "\\.md$" t)
-           for md-path = (concat (file-name-as-directory posts-dir) post)
-           for meta = (json-read-from-string (script-command-meta-json md-path))
-           for time = (parse-iso-date (alist-get 'date meta))
-           do (avl-tree-enter avl-tree
-                              `((path . ,(replace-extension md-path "html"))
-                                (title . ,(alist-get 'title meta))
-                                (iso-date . ,(format-time-string "%FT%TZ" time))
-                                (id . ,(alist-get 'id meta))
-                                (abstract . ,(alist-get 'abstract meta))
-                                (short-iso-date . ,(format-time-string "%F" time))
-                                (time . ,time)))))
+  (dolist (post (directory-files posts-dir nil "\\.md$" t) avl-tree)
+    (let* ((md-path (concat (file-name-as-directory posts-dir) post))
+           (meta (json-read-from-string (script-command-meta-json md-path)))
+           (time (parse-iso-date (alist-get 'date meta))))
+      (avl-tree-enter avl-tree
+                      `((path . ,(replace-extension md-path "html"))
+                        (title . ,(alist-get 'title meta))
+                        (iso-date . ,(format-time-string "%FT%TZ" time))
+                        (id . ,(alist-get 'id meta))
+                        (abstract . ,(alist-get 'abstract meta))
+                        (short-iso-date . ,(format-time-string "%F" time))
+                        (time . ,time))))))
 
 (cl-defun render-attrs (attrs)
   (mapconcat (lambda (pair)
