@@ -142,7 +142,7 @@ Or we could find all the ages under 40:
 These results could be joined to answer questions like "What are the names of
 the people under 40?"
 
-## Conclusion
+## Summary
 
 Transforming trees into tables provides a way to use R like a path query
 language. The conversion requires walking the tree and storing it in memory as a
