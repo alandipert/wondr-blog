@@ -1,5 +1,5 @@
 ---
-date: "2018-07-30"
+date: "2018-08-06"
 keywords: ["query", "trees"]
 title: "Querying Trees"
 id: "urn:uuid:0e02f8ce-6018-45be-80c0-5cd643b6555a"
@@ -144,8 +144,18 @@ Or we could find all the ages under 40:
 2 34
 ~~~
 
-These results could be joined to answer questions like "What are the names of
-the people under 40?"
+## Joining
+
+We can join query results in order to answer questions like "What are the names
+of people under 40?"
+
+First we gather the "ids" of people in the graph as `people_ids`, and then we
+filter by it in a subsequent query using `%in%`.
+
+~~~{.r}
+people_ids <- tree_subset(df, V3 == "age" & V4 < 40)
+tree_subset(df, V2 %in% people_ids & V3 == "name")$V4
+~~~
 
 ## Summary
 
@@ -155,6 +165,9 @@ table, and so may not be suitable for large trees. For small trees, however, the
 computation time is negligible and the programmer is able to write clear R code
 for querying the structure without explicitly walking the tree or admitting a
 separate query language.
+
+> Many thanks to [Barret Schloerke](http://schloerke.com/) for reviewing this
+> post and suggesting improvements.
 
 [rjsonpath]: https://github.com/blmoore/rjsonpath
 [jsonlite]: https://cran.r-project.org/web/packages/jsonlite/vignettes/json-aaquickstart.html
