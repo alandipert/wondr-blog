@@ -1,7 +1,7 @@
 ---
 date: "2018-08-06"
 keywords: ["query", "trees"]
-title: "Querying Trees"
+title: "Querying Trees in R"
 id: "urn:uuid:0e02f8ce-6018-45be-80c0-5cd643b6555a"
 abstract: |
   Transforming trees into tables provides a way to use R like a path query
