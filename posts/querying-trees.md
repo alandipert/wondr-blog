@@ -17,7 +17,7 @@ together offer comprehensive support for querying, visualizing, and modifying
 data in the form of rows and columns.
 
 Unfortunately, much data in the world is not tabular, and so not amenable to
-direct manipulation in R. JSON, one of today's most popular interchange format,
+direct manipulation in R. JSON, one of today's most popular interchange formats,
 is hierarchical or tree-like.
 
 The JSONPath query language has been developed to facilitate querying JSON
@@ -62,17 +62,21 @@ paths to a dataframe with rows of uniform length:
 # Returns a list of lists, each a path into the nested structure x. Each path
 # ends with the value at the leaf.
 paths <- function(parent, x) {
+  paths_recurse <- function(items) {
+    unlist(
+      lapply(items, function(item) {
+        paths(c(parent, item), x[[item]])
+      }),
+      recursive = FALSE
+    )
+  }
   if (typeof(x) == "list") {
-    # Unnamed list aka JSON array
     if (is.null(names(x))) {
-      Reduce(function(xs, i) {
-        c(xs, paths(c(parent, i), x[[i]]))
-      }, 1:length(x), list())
-    # Named list aka JSON object
+      # Unnamed list aka JSON array
+      paths_recurse(seq_along(x))
     } else if (length(x) > 0) {
-      Reduce(function(xs, name) {
-        c(xs, paths(c(parent, name), x[[name]]))
-      }, names(x), list())
+      # Named list aka JSON object
+      paths_recurse(names(x))
     }
   } else {
     # Leaf, return the path to the leaf and its value
@@ -87,10 +91,11 @@ tree_df <- function(tree) {
   ps <- paths(list(), tree)
 
   # Ensure rows are all the same length, with NA for padding
-  longest <- max(unlist(Map(length, ps)))
-  padded <- Map(function(path) {
-    c(as.list(path), rep(NA, longest-length(path)))
-  }, ps)
+  lengths <- vapply(ps, length, numeric(1))
+  longest <- max(lengths)
+  padded <- Map(ps, lengths, f = function(path, len) {
+    append(path, rep(NA, longest - len))
+  })
 
   as.data.frame(do.call(rbind, padded))
 }
@@ -124,7 +129,7 @@ tree_subset <- function(...) suppressWarnings(subset(...))
 Finally, we can write code to tell us everyone's names:
 
 ~~~{.r}
-> tree_subset(df, df$V3 == "name", V4)
+> tree_subset(df, V3 == "name", V4)
         V4
 1      Joe
 3    Lance
@@ -134,7 +139,7 @@ Finally, we can write code to tell us everyone's names:
 Or we could find all the ages under 40:
 
 ~~~{.r}
-> tree_subset(df, df$V3 == "age" & df$V4 < 40, V4)
+> tree_subset(df, V3 == "age" & V4 < 40, V4)
   V4
 2 34
 ~~~
