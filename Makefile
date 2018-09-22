@@ -11,14 +11,16 @@ TITLE := "Wondr Blog"
 
 CF_DIST := E6GOTXLS9MCZF
 S3_PATH := s3://tailrecursion.com/wondr
-CACHE_CONTROL := max-age=604800
+CACHE_CONTROL_DAYS := 7
+SECONDS_IN_DAY := 86400
+CACHE_CONTROL := max-age=$(shell expr $(CACHE_CONTROL_DAYS) \* $(SECONDS_IN_DAY))
 
 GEN := emacs --quick --script scripts/gen.el
 
 all: public
 
 style.css: $(SCSS)
-	sassc stylesheets/style.scss > style.css
+	sass stylesheets/style.scss > style.css
 
 code_highlight.css: style.css
 	$(GEN) syntax-highlight-css > $@

@@ -12,7 +12,7 @@ You'll need the following software installed. Dockerfile forthcoming:
 
 * Pandoc
 * Emacs 25+
-* The `scss` Ruby gem
+* [`sass`](https://sass-lang.com/)
 
 Generate HTML and atom.xml in the `public` directory:
 
@@ -29,15 +29,10 @@ with [live-server](https://github.com/tapio/live-server).
 
 ## Deployment
 
-Needs:
+The website is hosted on AWS in an S3 bucket and CloudFront is used for caching.
 
-* The `s3_website` Ruby gem
-
-`make deploy`
-    
-This part will only work if you're me, but hopefully it's clear enough what to
-edit to make this your own. The `Makefile` and `s3_website.yml` files contain
-most of what's specific to me.
+`make deploy` deploys the website to my AWS account and only works if you're
+me. To make this your own, you'll need to edit several things in the `Makefile`.
 
 ## Thanks
 
