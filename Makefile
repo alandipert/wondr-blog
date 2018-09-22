@@ -15,12 +15,18 @@ CACHE_CONTROL_DAYS := 7
 SECONDS_IN_DAY := 86400
 CACHE_CONTROL := max-age=$(shell expr $(CACHE_CONTROL_DAYS) \* $(SECONDS_IN_DAY))
 
+ifeq (, $(shell which sass))
+SASS := sass
+else
+SASS := sassc
+endif
+
 GEN := emacs --quick --script scripts/gen.el
 
 all: public
 
 style.css: $(SCSS)
-	sass stylesheets/style.scss > style.css
+	$(SASS) stylesheets/style.scss > style.css
 
 code_highlight.css: style.css
 	$(GEN) syntax-highlight-css > $@
