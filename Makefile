@@ -20,6 +20,9 @@ all: public
 style.css: $(SCSS)
 	sassc stylesheets/style.scss > style.css
 
+code_highlight.css: style.css
+	$(GEN) syntax-highlight-css > $@
+
 atom.xml: $(POSTS_MD) scripts/gen.el
 	$(GEN) atom "posts" $(TITLE) $(AUTHOR) $(BLOG_URL) $(FEED_ID) $(POST_BASE_URL) > $@
 
@@ -42,7 +45,7 @@ deploy: public
 	aws cloudfront create-invalidation --distribution-id $(CF_DIST) --paths '/*'
 
 clean:
-	rm -f atom.xml index.html style.css $(POSTS_HTML)
+	rm -f atom.xml index.html style.css code_highlight.css $(POSTS_HTML)
 	rm -rf public
 
 print-%:

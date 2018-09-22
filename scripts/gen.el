@@ -50,13 +50,53 @@ creating one."
     (with-temp-file tmp (insert "$meta-json$"))
     (sh "pandoc -t plain --template" (file-name-sans-extension tmp) file)))
 
+(defun slurp (filename)
+  "Return the contents of FILENAME."
+  (with-temp-buffer
+    (insert-file-contents filename)
+    (buffer-string)))
+
+(defun walk-html (inner outer html)
+  (if (listp html)
+      (funcall outer (mapcar inner (cddr html)))
+    (funcall outer html)))
+
+(defun postwalk-html (f form)
+  (walk-html (lambda (form) (postwalk-html f form))
+             #'identity
+             (funcall f form)))
+
+(defun find-tag (html tag)
+  (let ((tags nil))
+    (postwalk-html (lambda (html)
+                     (when (and (listp html)
+                                (eq (car html) tag))
+                       (push html tags))
+                     html)
+                   html)
+    (nreverse tags)))
+
+(defcommand syntax-highlight-css ()
+  "Produces the highlighting CSS used by pandoc"
+  (with-tmp html-out ".html"
+    (with-tmp md-in ".md"
+      (with-temp-file md-in (insert "```{.r}\n```"))
+      (sh "pandoc -f markdown -t HTML --standalone" "-o" html-out md-in)
+      (with-temp-buffer
+        (insert-file-contents html-out)
+        (let* ((html (libxml-parse-html-region (point-min) (point-max)))
+               (style-tags (find-tag html 'style))
+               (code-style (nth 1 style-tags)))
+          (nth 2 code-style))))))
+
 (defcommand post (file)
   "Generates the HTML for a single blog entry."
   (let* ((meta (json-read-from-string (script-command-meta-json file)))
          (time (parse-iso-date (alist-get 'date meta))))
     (sh "pandoc -f markdown -t HTML"
         "--template=templates/article"
-        "--highlight-style=kate"
+        ;; "--highlight-style=kate"
+        ;; "--standalone"
         "-V" (format-time-string "footer-year=%Y" (current-time))
         "-V" (format "iso-date=%s" (format-time-string "%FT%TZ" time))
         "-V" (format "short-iso-date='%s'" (format-time-string "%F" time))
