@@ -50,31 +50,13 @@ creating one."
     (with-temp-file tmp (insert "$meta-json$"))
     (sh "pandoc -t plain --template" (file-name-sans-extension tmp) file)))
 
-(defun slurp (filename)
-  "Return the contents of FILENAME."
-  (with-temp-buffer
-    (insert-file-contents filename)
-    (buffer-string)))
-
-(defun walk-html (inner outer html)
-  (if (listp html)
-      (funcall outer (mapcar inner (cddr html)))
-    (funcall outer html)))
-
-(defun postwalk-html (f form)
-  (walk-html (lambda (form) (postwalk-html f form))
-             #'identity
-             (funcall f form)))
-
-(defun find-tag (html tag)
-  (let ((tags nil))
-    (postwalk-html (lambda (html)
-                     (when (and (listp html)
-                                (eq (car html) tag))
-                       (push html tags))
-                     html)
-                   html)
-    (nreverse tags)))
+(defun find-tag (html-tree tag-name)
+  (when (listp html-tree)
+    (nconc (when (eq (car html-tree) tag-name)
+             (list html-tree))
+           (cl-mapcan (lambda (x)
+                        (find-tag x tag-name))
+                      (cddr html-tree)))))
 
 (defcommand syntax-highlight-css ()
   "Produces the highlighting CSS used by pandoc"
@@ -86,8 +68,8 @@ creating one."
         (insert-file-contents html-out)
         (let* ((html (libxml-parse-html-region (point-min) (point-max)))
                (style-tags (find-tag html 'style))
-               (code-style (nth 1 style-tags)))
-          (nth 2 code-style))))))
+               (style-strings (mapcar (lambda (tag) (nth 2 tag)) style-tags)))
+          (apply #'concat style-strings))))))
 
 (defcommand post (file)
   "Generates the HTML for a single blog entry."
