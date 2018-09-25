@@ -36,15 +36,7 @@ returns the result of body."
      (unwind-protect (progn ,@body)
        (delete-file ,file-name-var))))
 
-(defmacro defcommand (name &rest defun-spec)
-  "Defines a 'command', which is a function accessible as a
-command argument to this script. A command is any function with
-the prefix script-command-, this is just a convenience macro for
-creating one."
-  `(cl-defun ,(intern (concat "script-command-" (symbol-name name)))
-       ,@defun-spec))
-
-(cl-defun script-command-meta-json (file)
+(cl-defun blog-command-meta-json (file)
   "The metadata of a Pandoc markdown file formatted as JSON."
   (with-tmp tmp ".plain"
     (with-temp-file tmp (insert "$meta-json$"))
@@ -58,7 +50,7 @@ creating one."
                         (find-tag x tag-name))
                       (cddr html-tree)))))
 
-(defcommand syntax-highlight-css ()
+(cl-defun blog-command-syntax-highlight-css ()
   "Produces the highlighting CSS used by pandoc"
   (with-tmp html-out ".html"
     (with-tmp md-in ".md"
@@ -71,9 +63,9 @@ creating one."
                (style-strings (mapcar (lambda (tag) (nth 2 tag)) style-tags)))
           (apply #'concat style-strings))))))
 
-(defcommand post (file)
+(cl-defun blog-command-post (file)
   "Generates the HTML for a single blog entry."
-  (let* ((meta (json-read-from-string (script-command-meta-json file)))
+  (let* ((meta (json-read-from-string (blog-command-meta-json file)))
          (time (parse-iso-date (alist-get 'date meta))))
     (sh "pandoc -f markdown -t HTML"
         "--template=templates/article"
@@ -104,7 +96,7 @@ Posts are alists various properties given by the path to
 posts-dir and the metadata in the posts."
   (dolist (post (directory-files posts-dir nil "\\.md$" t) avl-tree)
     (let* ((md-path (concat (file-name-as-directory posts-dir) post))
-           (meta (json-read-from-string (script-command-meta-json md-path)))
+           (meta (json-read-from-string (blog-command-meta-json md-path)))
            (time (parse-iso-date (alist-get 'date meta))))
       (avl-tree-enter avl-tree
                       `((path . ,(replace-extension md-path "html"))
@@ -145,7 +137,7 @@ posts-dir and the metadata in the posts."
                         (a ((href . ,(alist-get 'path post)))
                            ,(alist-get 'title post))))))
 
-(defcommand index (posts-dir template-file)
+(cl-defun blog-command-index (posts-dir template-file)
   "Generates the blog index page."
   (let* ((posts (avl-tree-mapcar
                  #'index-post-entry
@@ -157,7 +149,7 @@ posts-dir and the metadata in the posts."
       (replace-match (mapconcat #'render-html posts ""))
       (buffer-string))))
 
-(defcommand atom
+(cl-defun blog-command-atom
     (posts-dir
      feed-title
      feed-author
@@ -190,9 +182,9 @@ posts-dir and the metadata in the posts."
 (cl-defun print-usage ()
   (princ "Available commands:\n")
   (let* ((commands nil)
-         (command-prefix "script-command-"))
+         (command-prefix "blog-command-"))
     (mapatoms (lambda (x)
-                (when (string-prefix-p "script-command-" (symbol-name x))
+                (when (string-prefix-p "blog-command-" (symbol-name x))
                   (push x commands))))
     (dolist (command commands)
       (princ (format " %s: %s\n"
@@ -204,8 +196,11 @@ posts-dir and the metadata in the posts."
       (progn
         (print-usage)
         (kill-emacs 1))
+    ;; Any functions named blog-command-* are accessible from the command line
+    ;; as an "action" argument to this script. Subsequent arguments are passed
+    ;; to the function as arguments.
     (cl-destructuring-bind (command &rest args) argv
-      (let* ((command-sym (intern (concat "script-command-" command))))
+      (let* ((command-sym (intern (concat "blog-command-" command))))
         (if (fboundp command-sym)
             (princ (apply command-sym args))
           (error (format "Unknown command: %s" command)))))))
