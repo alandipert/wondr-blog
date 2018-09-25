@@ -77,19 +77,11 @@ creating one."
          (time (parse-iso-date (alist-get 'date meta))))
     (sh "pandoc -f markdown -t HTML"
         "--template=templates/article"
-        ;; "--highlight-style=kate"
-        ;; "--standalone"
         "-V" (format-time-string "footer-year=%Y" (current-time))
         "-V" (format "iso-date=%s" (format-time-string "%FT%TZ" time))
         "-V" (format "short-iso-date='%s'" (format-time-string "%F" time))
         "-V" (format "reading-time='%s'" (reading-time file))
         file)))
-
-(defmacro with-let (binding &rest body)
-  "Evaluates body with binding, and returns the value of the
-binding variable. Equivalent to (let* ((x ...)) ... x)"
-  (declare (indent defun))
-  `(let* (,binding) ,@body ,(car binding)))
 
 (cl-defun post-before? (x y)
   "True when post x has an 'internal time' time property that
