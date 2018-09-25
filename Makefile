@@ -28,9 +28,6 @@ all: public
 style.css: $(SCSS)
 	$(SASS) stylesheets/style.scss > style.css
 
-code_highlight.css: style.css
-	$(GEN) syntax-highlight-css > $@
-
 atom.xml: $(POSTS_MD) scripts/gen.el
 	$(GEN) atom "posts" $(TITLE) $(AUTHOR) $(BLOG_URL) $(FEED_ID) $(POST_BASE_URL) > $@
 
@@ -40,12 +37,12 @@ index.html: templates/index.html $(POSTS_HTML) scripts/gen.el
 %.html: %.md templates/article.html scripts/gen.el
 	$(GEN) post $< > $@
 
-public: atom.xml index.html code_highlight.css style.css $(POSTS_HTML)
+public: atom.xml index.html style.css $(POSTS_HTML)
 	$(shell mkdir -p public/posts)
 	cp atom.xml public
 	cp index.html public
 	cp style.css public
-	cp code_highlight.css public
+	$(GEN) syntax-highlight-css > public/code_highlight.css
 	$(foreach html,$(POSTS_HTML),$(shell cp $(html) public/$(html)))
 
 deploy: public
@@ -53,7 +50,7 @@ deploy: public
 	aws cloudfront create-invalidation --distribution-id $(CF_DIST) --paths '/*'
 
 clean:
-	rm -f atom.xml index.html style.css code_highlight.css $(POSTS_HTML)
+	rm -f atom.xml index.html style.css $(POSTS_HTML)
 	rm -rf public
 
 print-%:
