@@ -16,9 +16,9 @@ SECONDS_IN_DAY := 86400
 CACHE_CONTROL := max-age=$(shell expr $(CACHE_CONTROL_DAYS) \* $(SECONDS_IN_DAY))
 
 ifeq (, $(shell which sass))
-SASS := sass
-else
 SASS := sassc
+else
+SASS := sass
 endif
 
 GEN := emacs --quick --script scripts/gen.el
