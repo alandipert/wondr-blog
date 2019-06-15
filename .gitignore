@@ -4,3 +4,4 @@ index.html
 posts/*.html
 .sass-cache
 public/
+*.sw[op]

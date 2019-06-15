@@ -143,7 +143,7 @@ value was ever not a logical vector of length 1:
 ~~~{.r}
 shouldIgnore <- function(msg) {
 
-	on.exit(stopifnot(is.logical(returnValue()) && length(returnValue()) == 1))
+  on.exit(stopifnot(is.logical(returnValue()) && length(returnValue()) == 1))
 
   canIgnore <- c('^a\\["ACK.*$', '^\\["ACK.*$', '^h$')
   if (length(unlist(stringr::str_match_all(msg, canIgnore))) > 0) return(TRUE)
