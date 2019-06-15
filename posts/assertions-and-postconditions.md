@@ -177,9 +177,10 @@ postcondition.
 1. `stopifnot()` is the easiest way to write assertions in R
 1. `on.exit()` and `returnValue()` can be used together with `stopifnot()` to write *postconditions*, or assertions about a function's return value.
 
-Thanks for reading, I hope you enjoyed the post! Thank you also to [Yihui
-Xie][yihui] for originally suggesting the approach to postconditions I
-elaborate on.
+Thanks for reading, I hope you enjoyed the post!
+
+Thank you also to [Yihui Xie][yihui] for originally suggesting the approach to
+postconditions that I elaborate upon.
 
 [assertions]: https://en.wikipedia.org/wiki/Assertion_(software_development)
 [postconditions]: https://en.wikipedia.org/wiki/Postcondition
