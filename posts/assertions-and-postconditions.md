@@ -39,7 +39,7 @@ Here's a silly example, using `stopifnot()`:
 
 ~~~{.r}
 make_odd <- function(n) {
-  stopifnot(n % 2 == 0)
+  stopifnot(n %% 2 == 0)
   n + 1
 }
 ~~~
@@ -60,7 +60,7 @@ The simplest way that comes to mind is something like this:
 ~~~{.r}
 make_odd <- function(n) {
   ret <- n + 1
-  stopifnot(ret % 2 == 1)
+  stopifnot(ret %% 2 == 1)
   ret
 }
 ~~~
