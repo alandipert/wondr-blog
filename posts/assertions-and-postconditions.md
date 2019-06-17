@@ -134,7 +134,7 @@ make_odd <- function(n) {
 ~~~
 
 1. `on.exit()` establishes an expression that should be run when the enclosing function, `make_odd()`, exits.
-1. `stopifnot()` is used as the expression &mdash; and assertion &mdash; to run
+1. `stopifnot()` is used as the expression to run
 1. `returnValue()` refers to the function's return value, or the result of `n + 1`
 
 `shouldIgnore()` could be augmented using the same technique, to error if its return
